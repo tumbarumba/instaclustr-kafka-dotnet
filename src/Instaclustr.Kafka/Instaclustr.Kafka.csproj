@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Instaclustr;Joe Schmetzer</Authors>
+    <Description>Instaclustr's .NET Utilities for Apache Kafka</Description>
+    <Copyright>Copyright 2021 Instaclustr, Joe Schmetzer</Copyright>
+    <PackageProjectUrl>https://github.com/instaclustr/instaclustr-kafka-dotnet/</PackageProjectUrl>
+    <PackageLicense>https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/master/LICENSE</PackageLicense>
+    <PackageReleaseNotes>https://github.com/instaclustr/instaclustr-kafka-dotnet/releases</PackageReleaseNotes>
+    <PackageTags>Kafka;Instaclustr</PackageTags>
+    <PackageId>Instaclustr.Kafka</PackageId>
+    <Title>Instaclustr.Kafka</Title>
+    <AssemblyName>Instaclustr.Kafka</AssemblyName>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <TargetFrameworks>netcoreapp3.1;net50</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="1.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

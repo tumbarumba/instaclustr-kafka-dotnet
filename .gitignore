@@ -1,0 +1,16 @@
+project.lock.json
+bin/
+bin-sn/
+obj/
+*.so
+*.dylib
+*.csproj.user
+*.xproj.user
+.vs
+.vscode
+.cache
+Properties
+packages/
+*~
+\#*
+core
