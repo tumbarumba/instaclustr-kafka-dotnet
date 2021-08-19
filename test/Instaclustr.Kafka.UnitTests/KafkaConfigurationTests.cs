@@ -1,13 +1,7 @@
 using Confluent.Kafka;
+using Confluent.SchemaRegistry;
 using System;
 using Xunit;
-// using Confluent.SchemaRegistry;
-// using SAGov.DIS.Kafka.Client;
-// using SAGov.DIS.Kafka.ObjectSchema.AvroSchema;
-// using System.Collections.Generic;
-// using System.Threading.Tasks;
-// using Newtonsoft.Json;
-// using Moq;
 
 namespace Instaclustr.Kafka
 {
@@ -59,6 +53,16 @@ namespace Instaclustr.Kafka
             Assert.IsType<ConsumerConfig>(consumerConfig);
             Assert.Equal("10.0.0.1:9092", consumerConfig.BootstrapServers);
             Assert.Equal("TestGroup", consumerConfig.GroupId);
+        }
+        
+        [Fact]
+        public void CanLoadSchemaRegistryConfig()
+        {
+            var config = new KafkaConfiguration();
+            var srConfig = config.GetSchemaRegistryConfig("Kafka:SchemaRegistry");
+
+            Assert.IsType<SchemaRegistryConfig>(srConfig);
+            Assert.Equal("https://schema-registry.example.com:8085", srConfig.Url);
         }
     }
 }

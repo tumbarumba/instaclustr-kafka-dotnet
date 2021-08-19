@@ -15,13 +15,10 @@
 // Refer to LICENSE for more information.
 
 using Confluent.Kafka;
-// using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System;
-// using System.Text.Json;
-// using NLog;
-// using NLog.Extensions.Logging;
 
 namespace Instaclustr.Kafka
 {
@@ -65,6 +62,16 @@ namespace Instaclustr.Kafka
         public ConsumerConfig GetConsumerConfig(string key)
         {
             var config = new ConsumerConfig();
+            configurationRoot.GetSection(key).Bind(config);
+            return config;
+        }
+
+        /// <summary>
+        ///     Loads the section of the specified key into a new SchemaRegistryConfig.
+        /// </summary>
+        public SchemaRegistryConfig GetSchemaRegistryConfig(string key)
+        {
+            var config = new SchemaRegistryConfig();
             configurationRoot.GetSection(key).Bind(config);
             return config;
         }
