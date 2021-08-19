@@ -47,6 +47,14 @@ namespace Instaclustr.Kafka
         }
 
         /// <summary>
+        ///     Retrieve a section from the configuration.
+        /// </summary>
+        public IConfigurationSection GetSection(string key)
+        {
+            return configurationRoot.GetSection(key);
+        }
+
+        /// <summary>
         ///     Loads the section of the specified key into a new ProducerConfig.
         /// </summary>
         public ProducerConfig GetProducerConfig(string key)

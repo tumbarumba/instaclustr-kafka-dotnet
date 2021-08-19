@@ -1,5 +1,8 @@
 using Confluent.Kafka;
 using Confluent.SchemaRegistry;
+using Microsoft.Extensions.Configuration;
+using NLog;
+using NLog.Extensions.Logging;
 using System;
 using Xunit;
 
@@ -31,6 +34,15 @@ namespace Instaclustr.Kafka
 
             Environment.SetEnvironmentVariable("ExampleString", null);
             Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", null);
+        }
+
+        [Fact]
+        public void CanRetieveConfigurationSection()
+        {
+            var config = new KafkaConfiguration();
+            var nlogSection = config.GetSection("NLog");
+            Assert.IsAssignableFrom<IConfigurationSection>(nlogSection);
+            LogManager.Configuration = new NLogLoggingConfiguration(nlogSection);
         }
 
         [Fact]
