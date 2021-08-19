@@ -1,6 +1,6 @@
+using Confluent.Kafka;
 using System;
 using Xunit;
-// using Confluent.Kafka;
 // using Confluent.SchemaRegistry;
 // using SAGov.DIS.Kafka.Client;
 // using SAGov.DIS.Kafka.ObjectSchema.AvroSchema;
@@ -37,6 +37,17 @@ namespace Instaclustr.Kafka
 
             Environment.SetEnvironmentVariable("ExampleString", null);
             Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", null);
+        }
+
+        [Fact]
+        public void CanLoadProducerConfiguration()
+        {
+            var config = new KafkaConfiguration();
+            var producerConfig = config.GetProducerConfig("Kafka:Producer");
+
+            Assert.IsType<ProducerConfig>(producerConfig);
+            Assert.Equal("127.0.0.1:9092", producerConfig.BootstrapServers);
+            Assert.Equal("admin", producerConfig.SaslUsername);
         }
 
     }

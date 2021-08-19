@@ -14,7 +14,7 @@
 //
 // Refer to LICENSE for more information.
 
-// using Confluent.Kafka;
+using Confluent.Kafka;
 // using Confluent.SchemaRegistry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -47,6 +47,16 @@ namespace Instaclustr.Kafka
         public T GetValue<T>(string key)
         {
             return configurationRoot.GetValue<T>(key);
+        }
+
+        /// <summary>
+        ///     Loads the section of the specified key into a new ProducerConfig.
+        /// </summary>
+        public ProducerConfig GetProducerConfig(string key)
+        {
+            var producerConfig = new ProducerConfig();
+            configurationRoot.GetSection(key).Bind(producerConfig);
+            return producerConfig;
         }
 
         private void InitConfiguration(string[] args) =>
@@ -182,35 +192,6 @@ namespace Instaclustr.Kafka
             logger.Debug($"Load schema registry settings for key {schemaRegistryKey}");
             return schemaRegistryConfig;
         }
-
-
-        //
-        // Summary:
-        //     Initializes the configuration, from one of the defined sources.
-        //     The precedence order is: appsettings.json, appsettings.(Environment).json, Environment Variables or Command Line arguments
-        //
-        // Parameters:
-        //   schemaRegistryKey:
-        //     The Schema Registry key define in appsettings.json
-        private void InitConfiguration(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((hostingContext, configuration) =>
-                {
-                    configuration.Sources.Clear();
-
-                    IHostEnvironment env = hostingContext.HostingEnvironment;
-                    configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                    configuration.AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
-                    configuration.AddEnvironmentVariables();
-
-                    if (args != null)
-                    {
-                        configuration.AddCommandLine(args);
-                    }
-                        
-                    configurationRoot = configuration.Build();
-                }).Build();
-
 */    
     }
 }
