@@ -18,6 +18,7 @@
 // using Confluent.SchemaRegistry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System;
 // using System.Text.Json;
 // using NLog;
 // using NLog.Extensions.Logging;
@@ -32,7 +33,10 @@ namespace Instaclustr.Kafka
     {
         private IConfigurationRoot configurationRoot = null;
 
-        public KafkaConfiguration()
+        /// <summary>
+        ///     Constructor.
+        /// </summary>
+        public KafkaConfiguration(string[] args = null)
         {
             InitConfiguration(null);
         }
@@ -51,15 +55,14 @@ namespace Instaclustr.Kafka
                 {
                     configuration.Sources.Clear();
 
-                    // IHostEnvironment env = hostingContext.HostingEnvironment;
-                    configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                    // configuration.AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
-                    // configuration.AddEnvironmentVariables();
-
-                    // if (args != null)
-                    // {
-                    //     configuration.AddCommandLine(args);
-                    // }
+                    IHostEnvironment env = hostingContext.HostingEnvironment;
+                    configuration.AddJsonFile($"appsettings.json", optional: true, reloadOnChange: true);
+                    configuration.AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
+                    configuration.AddEnvironmentVariables();
+                    if (args != null)
+                    {
+                        configuration.AddCommandLine(args);
+                    }
                         
                     configurationRoot = configuration.Build();
                 }).Build();

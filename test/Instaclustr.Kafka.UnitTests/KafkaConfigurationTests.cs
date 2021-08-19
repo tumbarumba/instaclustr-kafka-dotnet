@@ -1,4 +1,4 @@
-// using System;
+using System;
 using Xunit;
 // using Confluent.Kafka;
 // using Confluent.SchemaRegistry;
@@ -23,6 +23,21 @@ namespace Instaclustr.Kafka
             Assert.Equal(42,                config.GetValue<int>("ExampleInt"));
             Assert.Equal("127.0.0.1:9092",  config.GetValue<string>("Kafka:Producer:BootstrapServers"));
         }
-    
+
+        [Fact]
+        public void ConfigurationCanBeOverridenByEnvironmentVariables()
+        {
+            Environment.SetEnvironmentVariable("ExampleString", "overridden 1");
+            Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", "overridden 2");
+            var config = new KafkaConfiguration();
+
+            Assert.Equal("overridden 1",    config.GetValue<string>("ExampleString"));
+            Assert.Equal(42,                config.GetValue<int>("ExampleInt"));
+            Assert.Equal("overridden 2",    config.GetValue<string>("Kafka:Producer:BootstrapServers"));
+
+            Environment.SetEnvironmentVariable("ExampleString", null);
+            Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", null);
+        }
+
     }
 }
