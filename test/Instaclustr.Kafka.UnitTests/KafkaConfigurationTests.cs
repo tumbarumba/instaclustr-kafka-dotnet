@@ -40,7 +40,7 @@ namespace Instaclustr.Kafka
         }
 
         [Fact]
-        public void CanLoadProducerConfiguration()
+        public void CanLoadProducerConfig()
         {
             var config = new KafkaConfiguration();
             var producerConfig = config.GetProducerConfig("Kafka:Producer");
@@ -50,5 +50,15 @@ namespace Instaclustr.Kafka
             Assert.Equal("admin", producerConfig.SaslUsername);
         }
 
+        [Fact]
+        public void CanLoadConsumerConfig()
+        {
+            var config = new KafkaConfiguration();
+            var consumerConfig = config.GetConsumerConfig("Kafka:Consumer");
+
+            Assert.IsType<ConsumerConfig>(consumerConfig);
+            Assert.Equal("10.0.0.1:9092", consumerConfig.BootstrapServers);
+            Assert.Equal("TestGroup", consumerConfig.GroupId);
+        }
     }
 }

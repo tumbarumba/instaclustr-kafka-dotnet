@@ -54,9 +54,19 @@ namespace Instaclustr.Kafka
         /// </summary>
         public ProducerConfig GetProducerConfig(string key)
         {
-            var producerConfig = new ProducerConfig();
-            configurationRoot.GetSection(key).Bind(producerConfig);
-            return producerConfig;
+            var config = new ProducerConfig();
+            configurationRoot.GetSection(key).Bind(config);
+            return config;
+        }
+
+        /// <summary>
+        ///     Loads the section of the specified key into a new ConsumerConfig.
+        /// </summary>
+        public ConsumerConfig GetConsumerConfig(string key)
+        {
+            var config = new ConsumerConfig();
+            configurationRoot.GetSection(key).Bind(config);
+            return config;
         }
 
         private void InitConfiguration(string[] args) =>
