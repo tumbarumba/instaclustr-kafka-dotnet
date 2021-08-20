@@ -24,16 +24,31 @@ namespace Instaclustr.Kafka
         [Fact]
         public void ConfigurationCanBeOverridenByEnvironmentVariables()
         {
-            Environment.SetEnvironmentVariable("ExampleString", "overridden 1");
-            Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", "overridden 2");
+            Environment.SetEnvironmentVariable("ExampleString", "env 1");
+            Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", "env 2");
             var config = new KafkaConfiguration();
 
-            Assert.Equal("overridden 1",    config.GetValue<string>("ExampleString"));
-            Assert.Equal(42,                config.GetValue<int>("ExampleInt"));
-            Assert.Equal("overridden 2",    config.GetValue<string>("Kafka:Producer:BootstrapServers"));
+            Assert.Equal("env 1",   config.GetValue<string>("ExampleString"));
+            Assert.Equal(42,        config.GetValue<int>("ExampleInt"));
+            Assert.Equal("env 2",   config.GetValue<string>("Kafka:Producer:BootstrapServers"));
 
             Environment.SetEnvironmentVariable("ExampleString", null);
             Environment.SetEnvironmentVariable("Kafka__Producer__BootstrapServers", null);
+        }
+
+        [Fact]
+        public void ConfigurationCanBeOverridenByArguments()
+        {
+            string[] args = {
+                "--ExampleString", "arg 1",
+                "--Kafka:Producer:BootstrapServers=arg 2",
+                "/ExampleInt", "10"
+            };
+            var config = new KafkaConfiguration(args);
+
+            Assert.Equal("arg 1",   config.GetValue<string>("ExampleString"));
+            Assert.Equal(10,        config.GetValue<int>("ExampleInt"));
+            Assert.Equal("arg 2",   config.GetValue<string>("Kafka:Producer:BootstrapServers"));
         }
 
         [Fact]
