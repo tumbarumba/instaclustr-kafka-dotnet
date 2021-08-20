@@ -35,56 +35,51 @@ namespace Instaclustr.Kafka
         /// </summary>
         public KafkaConfiguration(string[] args = null)
         {
-            InitConfiguration(null);
+            this.configurationRoot = LoadConfiguration(args);
         }
 
         /// <summary>
         ///     Retrieve a value from the configuration.
         /// </summary>
-        public T GetValue<T>(string key)
-        {
-            return configurationRoot.GetValue<T>(key);
-        }
+        public T GetValue<T>(string key) =>
+            configurationRoot.GetValue<T>(key);
 
         /// <summary>
         ///     Retrieve a section from the configuration.
         /// </summary>
-        public IConfigurationSection GetSection(string key)
-        {
-            return configurationRoot.GetSection(key);
-        }
+        public IConfigurationSection GetSection(string key) =>
+            configurationRoot.GetSection(key);
 
         /// <summary>
         ///     Loads the section of the specified key into a new ProducerConfig.
         /// </summary>
-        public ProducerConfig GetProducerConfig(string key)
-        {
-            var config = new ProducerConfig();
-            configurationRoot.GetSection(key).Bind(config);
-            return config;
-        }
+        public ProducerConfig GetProducerConfig(string key) =>
+            BindNewConfig<ProducerConfig>(key);
 
         /// <summary>
         ///     Loads the section of the specified key into a new ConsumerConfig.
         /// </summary>
-        public ConsumerConfig GetConsumerConfig(string key)
-        {
-            var config = new ConsumerConfig();
-            configurationRoot.GetSection(key).Bind(config);
-            return config;
-        }
+        public ConsumerConfig GetConsumerConfig(string key) =>
+            BindNewConfig<ConsumerConfig>(key);
 
         /// <summary>
         ///     Loads the section of the specified key into a new SchemaRegistryConfig.
         /// </summary>
-        public SchemaRegistryConfig GetSchemaRegistryConfig(string key)
+        public SchemaRegistryConfig GetSchemaRegistryConfig(string key) =>
+            BindNewConfig<SchemaRegistryConfig>(key);
+
+        private T BindNewConfig<T>(string key) where T : new()
         {
-            var config = new SchemaRegistryConfig();
+            var config = new T();
             configurationRoot.GetSection(key).Bind(config);
             return config;
         }
 
-        private void InitConfiguration(string[] args) =>
+        private static IConfigurationRoot LoadConfiguration(string[] args)
+        {
+            IConfigurationRoot root = null;
+            Action<IConfigurationRoot> setRoot = (newRoot) => root = newRoot;
+
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, configuration) =>
                 {
@@ -99,7 +94,10 @@ namespace Instaclustr.Kafka
                         configuration.AddCommandLine(args);
                     }
                         
-                    configurationRoot = configuration.Build();
+                    setRoot(configuration.Build());
                 }).Build();
+
+            return root;
+        }
     }
 }
