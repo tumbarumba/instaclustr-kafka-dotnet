@@ -1,0 +1,60 @@
+$colourProducer = 0xb7e0a3
+$colourConsumer = 0x93d9f1
+$colourProcessor = 0xa5ddca
+$colourCluster = 0xeeeeee
+
+define filter {
+  $fwidth = $1
+
+  box invis width $fwidth height $fwidth with $2 at $3
+
+  line from last box.nw right $fwidth  \
+  then down 0.5*$fwidth left 0.375*$fwidth \
+  then down 0.5*$fwidth \
+  then left 0.25*$fwidth \
+  then up 0.5*$fwidth \
+  then up 0.5*$fwidth left 0.375*$fwidth
+}
+
+define user {
+  $uheight = $1
+  UserBox: box invis width 0.5*$uheight height $uheight \
+    with $3 at $4
+  Head: circle radius .125*$uheight with .n at UserBox.n
+  Body: line down 0.4*$uheight from Head.s
+  line left 0.2*$uheight down 0.2*$uheight from 0.05*$uheight below Body.n
+  line right 0.2*$uheight down 0.2*$uheight from 0.05*$uheight below Body.n
+  line left 0.2*$uheight down 0.35*$uheight from Body.s
+  line right 0.2*$uheight down 0.35*$uheight from Body.s
+  $2 small italic with .n at UserBox.s
+}
+
+define diamond {
+    box invisible $1 $2 $3 fit width 120% height 280%
+    line from last box .n to last box .e to last box .s to last box .w close \
+        fill beige behind last box
+}
+
+define terminal {
+    box radius .1 $1 $2 $3 fit height 150% \
+        fill azure
+}
+
+define envelope {
+  $esize = $1
+  box width $esize height $esize with $2 at $3
+  box thin width 0.7*$esize height 0.5*$esize with .c at previous.c fill 0xcccccc
+  line thin from previous.nw \
+    then to previous.c \
+    then to previous.ne
+  box invis width $esize height $esize with $2 at $3
+}
+
+define topic {
+  Topic: box width 3cm height 0.5cm with $2 at $3 fill 0xffffff
+  envelope(0.5cm,.w,Topic.w)
+  envelope(0.5cm,.w,0.5cm right of Topic.w)
+  $1 small italic with .w at previous.e
+  $4: box invis width 3cm height 0.5cm with $2 at $3
+}
+

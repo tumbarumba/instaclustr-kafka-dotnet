@@ -1,0 +1,147 @@
+= Publishing Domain Updates Over Kafka
+Joe Schmetzer <joe.schmetzer@instaclustr.com>;
+:backend: docbook
+:doctype: book
+:docinfo: shared
+:xrefstyle: basic
+:toc:
+
+== Introduction
+
+Congratulations! You’ve just started a new job as a Technical Lead at Example Ltd. The Engineering Manager introduces you to the team, and gets down to the nuts and bolts of your goals over the next several months.
+
+The situation is that Example Ltd has been growing like crazy for a number of years, and their different line of business systems are all a bit of a complicated mess right now. Each department has independent disconnected views of customer data, and it’s causing big problems. The Sales system has one view of the customer, the Billing system a different view with a different database, while the Operations department has yet another third party system with yet another view. Keeping all these systems in sync is a major challenge, getting exponentially worse as the company grows. Currently data entry clerks manually copy data from one system to another, but this is a slow and error prone process. If the company was able to automate this integration, it would provide up-to-date information in all systems, reduce errors in billing and operations, and free up the time of the people doing the manual updates to do more productive work.
+
+Your goal:
+
+* Design and build an software integration layer that supports keeping the different line of business systems with an up-to-date view of all the customer data
+* Follow the company-wide directive on technology use (.NET/C# for implementation language, Apache Kafka for integration)
+
+== Breaking Down the Problem
+
+You sketch out the current state architecture, as described by the engineering manager:
+
+[grid=none,frame=none,options="pgwide"]
+|===
+a|[pikchr,scaledwidth=100%,title=Current state architecture: stovepipe hell]
+....
+include::macros.pikchr[]
+
+SalesUser: box invis width 0.5cm height 1cm
+user(1cm,"Sales User",.c,SalesUser.c)
+SalesSystem: box width 3cm height 1.5cm radius 0.125cm \
+    with .w at 1cm right of SalesUser.e
+"Sales System" italic with .n at .5cm below previous.n
+arrow from SalesUser.e to SalesSystem.w
+
+BillingUser: box invis width 0.5cm height 1cm \
+    with .n at 1cm below SalesUser.s
+user(1cm,"Billing User",.c,BillingUser.c)
+BillingSystem: box width 3cm height 1.5cm radius 0.125cm \
+    with .w at 1cm right of BillingUser.e
+"Billing System" italic with .n at .5cm below previous.n
+arrow from BillingUser.e to BillingSystem.w
+
+OperationsUser: box invis width 0.5cm height 1cm \
+    with .n at 1cm below BillingUser.s
+user(1cm,"Operations User",.c,OperationsUser.c)
+OperationsSystem: box width 3cm height 1.5cm radius 0.125cm \
+    with .w at 1cm right of OperationsUser.e
+"Operations System" italic with .n at .5cm below previous.n
+arrow from OperationsUser.e to OperationsSystem.w
+
+IntegrationUser: box invis width 0.5cm height 1cm \
+    with .w at 3cm right of BillingSystem.e
+user(1cm,"Integration User",.c,IntegrationUser.c)
+spline from SalesSystem.e \
+    then to 1cm right of SalesSystem.e \
+    then to 1cm left of IntegrationUser.w \
+    then to IntegrationUser.w \
+    <-
+spline from BillingSystem.e \
+    then to 1cm right of BillingSystem.e \
+    then to 1cm left of IntegrationUser.w \
+    then to IntegrationUser.w \
+    <- \
+    "manual" italic small "updates" italic small
+spline from OperationsSystem.e \
+    then to 1cm right of OperationsSystem.e \
+    then to 1cm left of IntegrationUser.w \
+    then to IntegrationUser.w \
+    <-
+....
+|===
+
+Essentially, the three line of business systems are independent stovepipe systems with their own set of users, with additional admin users doing all the legwork of systems integration by manually copying data from one system to another.
+
+Our goal is to break down the stovepipe systems by introducing automated software integrations between systems, and eventually removing the need for the integration user completely.
+
+How can we go about this? One approach is to recognise this scenario is a good place to use event sourcing, where application can publish events to an external append-only event log. Kafka fits the bill here admirably, as an append-only log forms the core abstraction underlying Kafka.
+
+With this high level concept decided, the next incremental steps become evident. For each of the individual stovepipe systems, we need to:
+
+* Model the domain events that will be published
+* Implement the code to publish the customer updates to Kafka
+* Implement the code to consume the customer updates from Kafka
+
+This is actually a lot of work to do in one step. We can apply the pareto principle, and focus on the main sales funnel, where sales users capture details of sales prospects, which are then shared with other systems when the sale is finalised. That is, we will initially look at implementing a one-way integration, with updates flowing from the sales system to the billing system and the operations system. We will defer other integrations to a later date.
+
+Sketching out the future state architecture, it will look something like this:
+
+[grid=none,frame=none,options="pgwide"]
+|===
+a|[pikchr,scaledwidth=100%,title=Future state architecture: sales updates published and consumed]
+....
+include::macros.pikchr[]
+
+ICMS: [
+    Kafka: box width 4cm height 2cm radius 0.125cm fill $colourCluster
+    topic("sales-updates", .c, 1.25cm below Kafka.n, TopicSalesUpdates)
+    "Kafka Cluster" bold with .n at .25cm below Kafka.n
+]
+
+SalesSystem: box width 3cm height 1.5cm radius 0.125cm \
+    with .ne at 3cm left of ICMS.Kafka.nw
+"Sales System" italic with .n at .5cm below previous.n
+SalesUser: box invis width 0.5cm height 1cm with .e at 1cm left of SalesSystem.w
+user(1cm,"Sales User",.c,SalesUser.c)
+arrow from SalesUser.e to SalesSystem.w
+spline from SalesSystem.e \
+    then to 1cm right of SalesSystem.e \
+    then to 0.125cm above 1cm left of ICMS.TopicSalesUpdates.w \
+    then to 0.125cm above ICMS.TopicSalesUpdates.w \
+    ->
+"publish" small italic with .sw at SalesSystem.e
+
+BillingUser: box invis width 0.5cm height 1cm \
+    with .n at 1cm below SalesUser.s
+user(1cm,"Billing User",.c,BillingUser.c)
+BillingSystem: box width 3cm height 1.5cm radius 0.125cm \
+    with .w at 1cm right of BillingUser.e
+"Billing System" italic with .n at .5cm below previous.n
+arrow from BillingUser.e to BillingSystem.w
+spline from BillingSystem.e \
+    then to 1cm right of BillingSystem.e \
+    then to 0.125cm below 1cm left of ICMS.TopicSalesUpdates.w \
+    then to 0.125cm below ICMS.TopicSalesUpdates.w \
+    <-
+"consume" small italic with .nw at BillingSystem.e
+
+OperationsUser: box invis width 0.5cm height 1cm \
+    with .n at 1cm below BillingUser.s
+user(1cm,"Operations User",.c,OperationsUser.c)
+OperationsSystem: box width 3cm height 1.5cm radius 0.125cm \
+    with .w at 1cm right of OperationsUser.e
+"Operations System" italic with .n at .5cm below previous.n
+arrow from OperationsUser.e to OperationsSystem.w
+spline from OperationsSystem.e \
+    then to 1cm right of OperationsSystem.e \
+    then to 0.125cm below 1cm left of ICMS.TopicSalesUpdates.w \
+    then to 0.125cm below ICMS.TopicSalesUpdates.w \
+    <-
+"consume" small italic with .nw at OperationsSystem.e
+....
+|===
+
+== Modelling Domain Events
+
