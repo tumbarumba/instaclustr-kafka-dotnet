@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-
-# Stop on error
-set -e
+#######################################################################
+# Generate C# classes from Apache Avro IDL
+#######################################################################
 
 SCRIPT_NAME=$(basename $0)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -30,7 +30,7 @@ function sub_generate_avsc() {
   echo "Generating schema from idl into $GENERATED_AVRO_DIR"
   mkdir -p $GENERATED_AVRO_DIR
   echo "-> Converting sales-customer.avdl"
-  java -jar $AVRO_TOOLS_JAR idl2schemata sales-customer.avdl $GENERATED_AVRO_DIR
+  java -jar $AVRO_TOOLS_JAR idl2schemata avro/sales-customer.avdl $GENERATED_AVRO_DIR
 }
 
 function sub_generate_csharp() {
@@ -55,7 +55,7 @@ function sub_clean() {
 }
 
 function sub_help() {
-  echo "Usage: $SCRIPT_NAME <subcommand> [options]\n"
+  echo "Usage: $SCRIPT_NAME <subcommand>"
   echo "Subcommands:"
   echo "    clean       clean up generated files"
   echo "    generate    generate C# from Avro IDL files"
