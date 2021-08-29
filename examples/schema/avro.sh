@@ -2,9 +2,9 @@
 #######################################################################
 # Generate C# classes from Apache Avro IDL
 #
-# Run `./avro.sh --help` for usage instuctions.
+# Run `./avro.sh --help` for usage instructions.
 #
-# Prerequities
+# Prerequisites
 #
 # This script depends upon the following tools being installed:
 # - java (version 1.8 or higher)
@@ -24,6 +24,10 @@ AVRO_TOOLS_URL="$MAVEN_CENTRAL_URL/org/apache/avro/avro-tools/$AVRO_TOOLS_VERSIO
 AVRO_TOOLS_LOCAL_DIR="$HOME/.avro"
 AVRO_TOOLS_JAR="$AVRO_TOOLS_LOCAL_DIR/avro-tools.jar"
 
+function relpath() {
+  realpath --relative-to $SCRIPT_DIR $1
+}
+
 function sub_install_avro_tools() {
   echo "Checking avro-tools installation"
   if [[ -f $AVRO_TOOLS_JAR ]]
@@ -36,21 +40,21 @@ function sub_install_avro_tools() {
 }
 
 function sub_generate_avsc() {
-  echo "Generating schema from idl into $GENERATED_AVRO_DIR"
   mkdir -p $GENERATED_AVRO_DIR
+  echo "Generating schema from idl into $(relpath $GENERATED_AVRO_DIR)"
   for f in "$SCRIPT_DIR/avro"/*.avdl
   do
-    echo "-> Converting $f"
+    echo "-> Converting $(relpath $f)"
     java -jar $AVRO_TOOLS_JAR idl2schemata $f $GENERATED_AVRO_DIR
   done
 }
 
 function sub_generate_csharp() {
-  echo "Generating C# from schema into $GENERATED_CSHARP_DIR"
   mkdir -p $GENERATED_CSHARP_DIR
+  echo "Generating C# from schema into $(relpath $GENERATED_CSHARP_DIR)"
   for f in "$GENERATED_AVRO_DIR"/*.avsc
   do
-    echo "-> Converting $f"
+    echo "-> Converting $(relpath $f)"
     avrogen -s $f $GENERATED_CSHARP_DIR; \
   done
 }
