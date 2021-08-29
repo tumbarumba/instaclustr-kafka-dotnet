@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 #######################################################################
 # Generate C# classes from Apache Avro IDL
+#
+# Run `./avro.sh --help` for usage instuctions.
+#
+# Prerequities
+#
+# This script depends upon the following tools being installed:
+# - java (version 1.8 or higher)
+# - avrogen
+# - curl
 #######################################################################
 
 SCRIPT_NAME=$(basename $0)

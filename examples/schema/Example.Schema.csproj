@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Instaclustr;Joe Schmetzer</Authors>
+    <Description>Sample Avro schemas to demonstrate the use of Instaclustr's .NET Kafka examples.</Description>
+    <Copyright>Copyright 2021 Instaclustr, Joe Schmetzer</Copyright>
+    <PackageProjectUrl>https://github.com/instaclustr/instaclustr-kafka-dotnet/</PackageProjectUrl>
+    <PackageLicense>https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/master/LICENSE</PackageLicense>
+    <PackageReleaseNotes>https://github.com/instaclustr/instaclustr-kafka-dotnet/releases</PackageReleaseNotes>
+    <PackageTags>Kafka;Avro;Instaclustr</PackageTags>
+    <PackageId>Example.Schema</PackageId>
+    <Title>Example.Schema</Title>
+    <AssemblyName>Example.Schema</AssemblyName>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <TargetFrameworks>netcoreapp3.1;net50</TargetFrameworks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="1.7.0" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec WorkingDirectory="$(ProjectDir)" Command="./avro.sh generate" />
+    <ItemGroup>
+      <Compile Include="$(ProjectDir)build/generated/csharp/**/*.cs" Exclude="@(Compile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PreClean" BeforeTargets="BeforeClean">
+    <Exec WorkingDirectory="$(ProjectDir)" Command="./avro.sh clean" />
+  </Target>
+
+</Project>
