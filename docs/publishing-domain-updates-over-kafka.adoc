@@ -198,7 +198,7 @@ We are going to use the IDL schema definition. From the previous analysis of a s
 
 a|[source,avro idl]
 ----
-include::../examples/schema/sales-customer.avdl[]
+include::../examples/schema/avro/sales-customer.avdl[]
 ----
 |===
 
@@ -239,3 +239,44 @@ Now, we can create the ```.cs``` files as follows:
     do avrogen -s $f build/generated/cs; \
     done
 ```
+
+The above steps are complex and hard to remember. Fortunately, with knowledge of scripting, we can create a tool to automate all of this. The script ```avro.sh``` does all the steps above, and can be found at https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/main/examples/schema/avro.sh[https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/main/examples/schema/avro.sh].
+
+To use, run the command as follows:
+
+```
+> ./avro.sh generate
+Checking avro-tools installation
+-> avro-tools already installed at /home/joe/.avro/avro-tools.jar
+Generating schema from idl into build/generated/avro
+-> Converting avro/sales-customer.avdl
+Generating C# from schema into build/generated/csharp
+-> Converting build/generated/avro/Company.avsc
+-> Converting build/generated/avro/Customer.avsc
+-> Converting build/generated/avro/Location.avsc
+-> Converting build/generated/avro/PersonName.avsc
+```
+
+The messages show the script:
+
+* checking that `avro-tools.jar` is installed
+* generating the JSON schema files from the IDL
+* generating the C# from the JSON schema
+
+The final step is to add a `.csproj` file to call the script when building. We can hook into the dotnet build steps by adding the following target into the project:
+
+[source,xml]
+----
+<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Exec WorkingDirectory="$(ProjectDir)" Command="./avro.sh generate" />
+  <ItemGroup>
+    <Compile Include="$(ProjectDir)build/generated/csharp/**/*.cs" Exclude="@(Compile)" />
+  </ItemGroup>
+</Target>
+----
+
+The full example of this can be found in https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/main/examples/schema/Example.Schema.csproj[https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/main/examples/schema/Example.Schema.csproj]
+
+== Publishing Sales Customer Events into Kafka
+
+Now that we have a schema, and the C# code that we can use to interact with the schema, we're now in a position to actually write events into a Kafka topic.
