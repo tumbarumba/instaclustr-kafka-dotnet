@@ -1,0 +1,30 @@
+@namespace("Example.Domain.Sales")
+protocol SalesCustomerProtocol {
+    record PersonName {
+        string title;
+        string givenName;
+        string familyName;
+    }
+
+    record Location {
+        string city;
+        string state;
+        string country;
+    }
+
+    record Company {
+        int companyId;
+        string name;
+    }
+
+    record Customer {
+        int                      customerId;
+        PersonName               name;
+        union {null, string}     phoneNumber;
+        union {null, string}     email;
+        union {null, Location}   location;
+        union {null, Company}    company;
+        union {null, PersonName} leadSource;
+        union {null, PersonName} leadOwner;
+    }
+}
