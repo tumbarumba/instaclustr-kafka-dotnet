@@ -38,8 +38,11 @@ function sub_install_avro_tools() {
 function sub_generate_avsc() {
   echo "Generating schema from idl into $GENERATED_AVRO_DIR"
   mkdir -p $GENERATED_AVRO_DIR
-  echo "-> Converting sales-customer.avdl"
-  java -jar $AVRO_TOOLS_JAR idl2schemata avro/sales-customer.avdl $GENERATED_AVRO_DIR
+  for f in "$SCRIPT_DIR/avro"/*.avdl
+  do
+    echo "-> Converting $f"
+    java -jar $AVRO_TOOLS_JAR idl2schemata $f $GENERATED_AVRO_DIR
+  done
 }
 
 function sub_generate_csharp() {
