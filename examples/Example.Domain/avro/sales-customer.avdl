@@ -1,7 +1,6 @@
 @namespace("Example.Domain.Sales")
 protocol SalesCustomerProtocol {
     record PersonName {
-        string title;
         string givenName;
         string familyName;
     }
@@ -13,12 +12,12 @@ protocol SalesCustomerProtocol {
     }
 
     record Company {
-        int companyId;
+        long   companyId;
         string name;
     }
 
     record Customer {
-        int                      customerId;
+        long                     customerId;
         PersonName               name;
         union {null, string}     phoneNumber;
         union {null, string}     email;

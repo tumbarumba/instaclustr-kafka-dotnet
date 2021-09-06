@@ -198,7 +198,7 @@ We are going to use the IDL schema definition. From the previous analysis of a s
 
 a|[source,avro idl]
 ----
-include::../examples/schema/avro/sales-customer.avdl[]
+include::../examples/Example.Domain/avro/sales-customer.avdl[]
 ----
 |===
 
@@ -280,3 +280,30 @@ The full example of this can be found in https://github.com/instaclustr/instaclu
 == Publishing Sales Customer Events into Kafka
 
 Now that we have a schema, and the C# code that we can use to interact with the schema, we're now in a position to actually write events into a Kafka topic.
+
+Before we do anything else, we first need a Kafka cluster to actually write our data. Initially, we can use a single node Kafka cluster running locally to test out our code. This is not a production safe environment, but it gets us up and running.
+
+The following ```docker-compose.yml``` file will set up three services:
+
+* Apache Zookeeper (currently required by Kafka)
+* Apache Kafka (running in as a single broker)
+* Confluent Schema Registry
+
+[grid=rows,frame=all,options="pgwide"]
+|===
+a|docker-compose.yml
+
+a|[source,yaml]
+----
+include::../examples/docker/docker-compose.yml[]
+----
+|===
+
+To start these services, run the command:
+
+[source,bash]
+----
+> docker-compose up -d
+----
+
+The first time you run this

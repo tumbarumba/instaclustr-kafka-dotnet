@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Instaclustr;Joe Schmetzer</Authors>
+    <Description>Sample producer for sales customer data, part of Instaclustr's .NET Kafka examples.</Description>
+    <Copyright>Copyright 2021 Instaclustr, Joe Schmetzer</Copyright>
+    <PackageProjectUrl>https://github.com/instaclustr/instaclustr-kafka-dotnet/</PackageProjectUrl>
+    <PackageLicense>https://github.com/instaclustr/instaclustr-kafka-dotnet/blob/master/LICENSE</PackageLicense>
+    <PackageReleaseNotes>https://github.com/instaclustr/instaclustr-kafka-dotnet/releases</PackageReleaseNotes>
+    <PackageTags>Kafka;Avro;Instaclustr</PackageTags>
+    <PackageId>Example.Producer.Sales</PackageId>
+    <Title>Example.Producer.Sales</Title>
+    <AssemblyName>Example.Producer.Sales</AssemblyName>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <TargetFramework>net50</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="1.7.0" />
+    <PackageReference Include="Confluent.SchemaRegistry" Version="1.7.0" />
+    <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="1.7.0" />
+    <PackageReference Include="Faker.Data" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Instaclustr.Kafka/Instaclustr.Kafka.csproj">
+      <Name>Instaclustr.Kafka</Name>
+    </ProjectReference>
+    <ProjectReference Include="../Example.Domain/Example.Domain.csproj">
+      <Name>Example.Schema</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
