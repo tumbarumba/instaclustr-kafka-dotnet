@@ -7,16 +7,12 @@ namespace Example.Producer.Sales
     {
         public Customer FakeCustomer()
         {
-            long customerId = BitConverter.ToInt64(Guid.NewGuid().ToByteArray(), 0);
-            long comapnyId = BitConverter.ToInt64(Guid.NewGuid().ToByteArray(), 0);
-
             return new Customer() {
-                customerId = customerId,
+                customerId = Guid.NewGuid().ToString(),
                 name = new PersonName() {
                     givenName = Faker.Name.FirstName(),
                     familyName = Faker.Name.LastName()
                 },
-                phoneNumber = Faker.Number.RandomNumber(10000000,99999999).ToString(),
                 email = Faker.User.Email(),
                 location = new Location() {
                     city = Faker.Address.USCity(),
@@ -24,8 +20,8 @@ namespace Example.Producer.Sales
                     country = Faker.Address.Country()
                 },
                 company = new Company() {
-                    companyId = comapnyId,
-                    name = String.Join(" ", Faker.Lorem.Words())
+                    companyId = Guid.NewGuid().ToString(),
+                    name = String.Join(" ", Faker.Lorem.Words(3))
                 }
             };
         }

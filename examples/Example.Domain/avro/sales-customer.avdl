@@ -12,12 +12,12 @@ protocol SalesCustomerProtocol {
     }
 
     record Company {
-        long   companyId;
+        string companyId;
         string name;
     }
 
     record Customer {
-        long                     customerId;
+        string                   customerId;
         PersonName               name;
         union {null, string}     phoneNumber;
         union {null, string}     email;

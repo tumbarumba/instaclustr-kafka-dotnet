@@ -72,7 +72,7 @@ spline from OperationsSystem.e \
 ....
 |===
 
-Essentially, the three line of business systems are independent stovepipe systems with their own set of users, with additional admin users doing all the legwork of systems integration by manually copying data from one system to another.
+Essentially, the three line of business systems are independent stovepipes with their own set of users, with additional back office integration users doing all the legwork of systems integration by manually copying data from one system to another.
 
 Our goal is to break down the stovepipe systems by introducing automated software integrations between systems, and eventually removing the need for the integration user completely.
 
@@ -96,7 +96,7 @@ include::macros.pikchr[]
 
 ICMS: [
     Kafka: box width 4cm height 2cm radius 0.125cm fill $colourCluster
-    topic("sales-updates", .c, 1.25cm below Kafka.n, TopicSalesUpdates)
+    topic("Sales.Customer", .c, 1.25cm below Kafka.n, TopicSalesUpdates)
     "Kafka Cluster" bold with .n at .25cm below Kafka.n
 ]
 
@@ -291,7 +291,7 @@ The following ```docker-compose.yml``` file will set up three services:
 
 [grid=rows,frame=all,options="pgwide"]
 |===
-a|docker-compose.yml
+|examples/docker/docker-compose.yml
 
 a|[source,yaml]
 ----
@@ -306,4 +306,95 @@ To start these services, run the command:
 > docker-compose up -d
 ----
 
-The first time you run this
+The first time you run this will will need to download three large images corresponding to the services. Subsequent runs will be quicker.
+
+Once Kafka is up and running, we can write and test the code to write the sales customer update.
+
+Firstly, how to we create the sales data? In this case, we can create test data by using the ```Faker.Data``` library.
+
+[grid=rows,frame=all,options="pgwide"]
+|===
+|examples/Example.Producer.Sales/FakeDataGenerator.cs
+a|[source,csharp]
+----
+include::../examples/Example.Producer.Sales/FakeDataGenerator.cs[]
+----
+|===
+
+With this fake data tool, we're now in a position where we can write sales customer data into the topic. The class ```CustomerUpdateGenerator``` contains a number of functions to do this.
+
+The first function is the ```Run``` method:
+
+[grid=rows,frame=all,options="pgwide"]
+|===
+|examples/Example.Producer.Sales/CustomerUpdateGenerator.cs - Run
+a|[source,csharp]
+----
+include::../examples/Example.Producer.Sales/CustomerUpdateGenerator.cs[tag=Run,indent=0]
+----
+|===
+
+This creates a Kafka producer buy calling the ```BuildProducer``` method (see below), and then starting an infinite loop to produduce a fake customer (by calling the ```ProducerFakeCustomer``` method), and then sleeping for one second.
+
+The ```BuildProducer``` method:
+
+[grid=rows,frame=all,options="pgwide"]
+|===
+|examples/Example.Producer.Sales/ExampleSalesProducer.cs - BuildProducer
+a|[source,csharp]
+----
+include::../examples/Example.Producer.Sales/CustomerUpdateGenerator.cs[tag=BuildProducer,indent=0]
+----
+|===
+
+This method does the heavy lifting of setting up the configuration of everything needed to create the producer. As we are using Avro formatted messages, we also need to configure the connection to the Schema Registry, and configure the producer to serialise the data using Avro.
+
+In this example, the Schema Registry and the Kafka brokers are all hard-coded to be on the local host. In future tutorials, we will change this to use a "real" Kafka cluster.
+
+The final method is ```ProduceFakeCustomer```:
+
+[grid=rows,frame=all,options="pgwide"]
+|===
+|examples/Example.Producer.Sales/ExampleSalesProducer.cs - ProduceFakeCustomer
+a|[source,csharp]
+----
+include::../examples/Example.Producer.Sales/CustomerUpdateGenerator.cs[tag=ProduceFakeCustomer,indent=0]
+----
+|===
+
+This generates a fake customer object (with all the fields filled in with random, fake data). It then uses the producer to send the message to Kafka, and then asynchronously write a message showing the result of the write.
+
+The final piece of the puzzle is to create a ```Main``` method to allow this to be called from the command line:
+
+[grid=rows,frame=all,options="pgwide"]
+|===
+|examples/Example.Producer.Sales/Program.cs
+a|[source,csharp]
+----
+include::../examples/Example.Producer.Sales/Program.cs[]
+----
+|===
+
+This simply news up an instance of our ```CustomerUpdateGenerator``` class, and calls ```Run``` on it.
+
+We can run this from the command line as follows:
+
+[source,bash]
+----
+> dotnet run
+Writing customer 8269db07-c6fe-4cc4-a807-b137cf068383 (Willian Ohlund)...
+-> Wrote customer 8269db07-c6fe-4cc4-a807-b137cf068383 to [Sales.CustomerUpdates [[2]] @0]
+Writing customer 107fa974-e0fa-492b-8fed-5bb4a521857a (Sandee Benbenek)...
+-> Wrote customer 107fa974-e0fa-492b-8fed-5bb4a521857a to [Sales.CustomerUpdates [[0]] @0]
+Writing customer 14e55c6c-6dd5-45d9-a6c5-c0d4f8ebe3ce (Alice Lada)...
+-> Wrote customer 14e55c6c-6dd5-45d9-a6c5-c0d4f8ebe3ce to [Sales.CustomerUpdates [[1]] @0]
+Writing customer b7f4a8fe-b0bc-4a96-86d0-ccefb81f5fdd (Joette Irmeger)...
+-> Wrote customer b7f4a8fe-b0bc-4a96-86d0-ccefb81f5fdd to [Sales.CustomerUpdates [[0]] @1]
+...
+----
+
+The program will keep on running until you terminate it by pressing ```<ctrl-c>```.
+
+With that, we have a fully working example that is writing sales customer updates into a Kafka topic.
+
+Next, we will explore building a program to read and use that data.
